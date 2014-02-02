@@ -24,7 +24,7 @@ describe('Service: authentication', function () {
         };
 
         loginSuccessfullResponse = {
-            "access_token":"take-on-me",
+            "access_token":"secret",
             "token_type":"bearer",
             "expires_in":1209599,
             "userName":"Ali",
@@ -59,7 +59,7 @@ describe('Service: authentication', function () {
 
     it('should remember token', function() {
         logIn();
-        expect(authentication.getToken()).toBe('take-on-me');
+        expect(authentication.getToken()).toBe('secret');
     });
 
     it('should not decorate requests not targeted at the API with token information', function() {
@@ -71,7 +71,7 @@ describe('Service: authentication', function () {
 
     it('should decorate all subsequent requests to the API with the token information', function() {
         logIn();
-        $httpBackend.expectGET( BaseUrl + 'test', {"Accept":"application/json, text/plain, */*","Authorization":"take-on-me"} ).respond();
+        $httpBackend.expectGET( BaseUrl + 'test', {"Accept":"application/json, text/plain, */*","Authorization":"secret"} ).respond();
         $http.get( BaseUrl + 'test' );
         $httpBackend.flush();
     });
@@ -96,7 +96,7 @@ describe('Service: authentication', function () {
     it('should save token to local storage', function() {
         expect($localStorage.token).toBeUndefined();
         logIn();
-        expect($localStorage.token).toBe('take-on-me');
+        expect($localStorage.token).toBe('secret');
     });
 
     it('should use the token from local storage if defined', function() {
