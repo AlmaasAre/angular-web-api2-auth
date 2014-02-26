@@ -1,7 +1,8 @@
 {
-  "version": "0.0.0",
+  "version": "0.0.1",
   "name": "angular-web-api2-auth",
   "description": "Angular provider for integration with WebAPI2 token authentication",
+  "author": "Kenneth Lynne <kenneth.lynne@gmail.com>",
   "license": "MIT",
   "ignore": [
     "**/.*",
@@ -9,7 +10,7 @@
     "bower_components"
   ],
   "dependencies": {
-    "angular": "~1.2.9",
+    "angular": "~1.2.14",
     "ngstorage": "~0.3.0"
   },
   "devDependencies": {

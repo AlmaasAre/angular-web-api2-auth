@@ -1,14 +1,14 @@
 angular.module('kennethlynne.webapi2auth', ['ngStorage'])
-    .provider('authentication', function ($httpProvider) {
+    .provider('webAPIAuth', function ($httpProvider) {
 
-        var BaseUrl = '';
+        var tokenUrl = 'token';
         var tokenNamespace = 'token';
 
         $httpProvider.interceptors.push(function ($q, $injector) {
             return {
                 request: function (cfg) {
-                    var token = $injector.get('authentication').getToken();
-                    var matchesAPIUrl = cfg.url.substr(0, BaseUrl.length) === BaseUrl;
+                    var token = $injector.get('webAPIAuth').getToken();
+                    var matchesAPIUrl = cfg.url.substr(0, tokenUrl.length) === tokenUrl;
 
                     if (token && matchesAPIUrl) {
                         cfg.headers['Authorization'] = token;
@@ -17,6 +17,10 @@ angular.module('kennethlynne.webapi2auth', ['ngStorage'])
                 }
             };
         });
+
+        this.setTokenEndpointUrl = function (url) {
+            tokenUrl = url;
+        };
 
         this.$get = function ($http, $localStorage, $log, $q) {
             var _logout = function () {
@@ -31,7 +35,7 @@ angular.module('kennethlynne.webapi2auth', ['ngStorage'])
 
                     var cfg = {
                         method: 'POST',
-                        url: BaseUrl + 'token',
+                        url: tokenUrl,
                         data: 'grant_type=' + grantType + '&username=' + username + '&password=' + password,
                         headers: {'Content-Type': 'application/x-www-form-urlencoded'}
                     };
@@ -69,7 +73,4 @@ angular.module('kennethlynne.webapi2auth', ['ngStorage'])
                 logout: _logout
             }
         }
-    })
-    .run(function (authentication, $location) {
-        authentication.isLoggedIn() || $location.path('/login')
     });

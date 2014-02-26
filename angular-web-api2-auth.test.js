@@ -1,25 +1,26 @@
 'use strict';
 
-describe('Service: authentication', function () {
+describe('Service: webAPIAuth', function () {
 
-    var authentication, $httpBackend, BaseUrl = 'APIBaseUrl/', $http, loginSuccessfullResponse, loginFailedResponse, logIn, $localStorage;
+    var webAPIAuth, $httpBackend, endpoint = 'url/token', $http, loginSuccessfullResponse, loginFailedResponse, logIn, $localStorage;
 
     beforeEach(function () {
 
         $localStorage = {};
 
-        module('kennethlynne.webapi2auth', function ($provide) {
+        module('kennethlynne.webapi2auth', function ($provide, webAPIAuthProvider) {
+            webAPIAuthProvider.setTokenEndpointUrl(endpoint);
             $provide.value('$localStorage', $localStorage);
         });
 
         logIn = function logIn() {
-            $httpBackend.expectPOST( BaseUrl + 'token', 'grant_type=password&username=Ali&password=password123',
+            $httpBackend.expectPOST( endpoint, 'grant_type=password&username=Ali&password=password123',
                 {
                     'Content-Type':'application/x-www-form-urlencoded',
                     'Accept':'application/json, text/plain, */*'
                 }).respond(200, loginSuccessfullResponse);
 
-            authentication.login('password', 'Ali', 'password123');
+            webAPIAuth.login('password', 'Ali', 'password123');
             $httpBackend.flush();
         };
 
@@ -36,8 +37,8 @@ describe('Service: authentication', function () {
             message: 'Not authorized.'
         };
 
-        inject(function (_authentication_, _$httpBackend_, _$http_) {
-            authentication = _authentication_;
+        inject(function (_webAPIAuth_, _$httpBackend_, _$http_) {
+            webAPIAuth = _webAPIAuth_;
             $httpBackend = _$httpBackend_;
             $http = _$http_;
         });
@@ -50,16 +51,16 @@ describe('Service: authentication', function () {
     });
 
     it('should return the current login state', function() {
-        expect(authentication.isLoggedIn()).toBeFalsy();
+        expect(webAPIAuth.isLoggedIn()).toBeFalsy();
     });
 
     it('should return undefined token when not logged in', function() {
-        expect(authentication.getToken()).toBeUndefined();
+        expect(webAPIAuth.getToken()).toBeUndefined();
     });
 
     it('should remember token', function() {
         logIn();
-        expect(authentication.getToken()).toBe('secret');
+        expect(webAPIAuth.getToken()).toBe('secret');
     });
 
     it('should not decorate requests not targeted at the API with token information', function() {
@@ -71,25 +72,25 @@ describe('Service: authentication', function () {
 
     it('should decorate all subsequent requests to the API with the token information', function() {
         logIn();
-        $httpBackend.expectGET( BaseUrl + 'test', {"Accept":"application/json, text/plain, */*","Authorization":"secret"} ).respond();
-        $http.get( BaseUrl + 'test' );
+        $httpBackend.expectGET( endpoint + 'test', {"Accept":"application/json, text/plain, */*","Authorization":"secret"} ).respond();
+        $http.get( endpoint + 'test' );
         $httpBackend.flush();
     });
 
     it('should indicate that the user is logged in', function() {
         logIn();
-        expect(authentication.isLoggedIn()).toBeTruthy();
+        expect(webAPIAuth.isLoggedIn()).toBeTruthy();
     });
 
     it('should reset information on logout', function() {
         logIn();
-        authentication.logout();
+        webAPIAuth.logout();
 
-        expect(authentication.getToken()).toBeUndefined();
-        expect(authentication.isLoggedIn()).toBeFalsy();
+        expect(webAPIAuth.getToken()).toBeUndefined();
+        expect(webAPIAuth.isLoggedIn()).toBeFalsy();
 
-        $httpBackend.expectGET( BaseUrl + 'test', {"Accept":"application/json, text/plain, */*"} ).respond();
-        $http.get(BaseUrl + 'test', {"Accept":"application/json, text/plain, */*"});
+        $httpBackend.expectGET( endpoint + 'test', {"Accept":"application/json, text/plain, */*"} ).respond();
+        $http.get(endpoint + 'test', {"Accept":"application/json, text/plain, */*"});
         $httpBackend.flush();
     });
 
@@ -101,11 +102,11 @@ describe('Service: authentication', function () {
 
     it('should use the token from local storage if defined', function() {
         $localStorage.token = 'awesome';
-        expect(authentication.getToken()).toBe('awesome');
+        expect(webAPIAuth.getToken()).toBe('awesome');
     });
 
     it('should reject the promise if the password or username is wrong', function() {
-        $httpBackend.expectPOST( BaseUrl + 'token', 'grant_type=password&username=wrong&password=pw',
+        $httpBackend.expectPOST( endpoint, 'grant_type=password&username=wrong&password=pw',
             {
                 'Content-Type':'application/x-www-form-urlencoded',
                 'Accept':'application/json, text/plain, */*'
@@ -115,7 +116,7 @@ describe('Service: authentication', function () {
         var success = jasmine.createSpy('success');
         var done = jasmine.createSpy('finally');
 
-        authentication.login('password', 'wrong', 'pw').then(success).catch(failed).finally(done);
+        webAPIAuth.login('password', 'wrong', 'pw').then(success).catch(failed).finally(done);
         $httpBackend.flush();
 
         expect(failed).toHaveBeenCalled();
