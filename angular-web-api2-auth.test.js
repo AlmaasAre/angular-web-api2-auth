@@ -2,33 +2,38 @@
 
 describe('Service: webAPIAuth', function () {
 
-    var webAPIAuth, $httpBackend, endpoint = 'url/token', $http, loginSuccessfullResponse, loginFailedResponse, logIn, $localStorage;
+    var webAPIAuth, $httpBackend, endpoint = 'url/token', $http, loginSuccessfulResponse, loginFailedResponse, logIn, localStorage, token;
 
     beforeEach(function () {
 
-        $localStorage = {};
+        token = undefined;
 
-        module('kennethlynne.webapi2auth', function ($provide, webAPIAuthProvider) {
+        localStorage = {
+            setItem: jasmine.createSpy('localStorage.setItem').andCallFake(function(k, v) {token = v}),
+            getItem: jasmine.createSpy('localStorage.getItem').andCallFake(function() {return token})
+        };
+
+        module('kennethlynne.webAPI2Authentication', function ($provide, webAPIAuthProvider) {
             webAPIAuthProvider.setTokenEndpointUrl(endpoint);
-            $provide.value('$localStorage', $localStorage);
+            $provide.value('$window', {localStorage:localStorage})
         });
 
         logIn = function logIn() {
-            $httpBackend.expectPOST( endpoint, 'grant_type=password&username=Ali&password=password123',
+            $httpBackend.expectPOST( endpoint, 'grant_type=password&username=John_doe&password=password123',
                 {
                     'Content-Type':'application/x-www-form-urlencoded',
                     'Accept':'application/json, text/plain, */*'
-                }).respond(200, loginSuccessfullResponse);
+                }).respond(200, loginSuccessfulResponse);
 
-            webAPIAuth.login('password', 'Ali', 'password123');
+            webAPIAuth.login('password', 'John_doe', 'password123');
             $httpBackend.flush();
         };
 
-        loginSuccessfullResponse = {
-            "access_token":"secret",
+        loginSuccessfulResponse = {
+            "access_token":"token",
             "token_type":"bearer",
             "expires_in":1209599,
-            "userName":"Ali",
+            "userName":"John_doe",
             ".issued":"Mon, 14 Oct 2013 06:53:32 GMT",
             ".expires":"Mon, 28 Oct 2013 06:53:32 GMT"
         };
@@ -50,17 +55,17 @@ describe('Service: webAPIAuth', function () {
         $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('should return the current login state', function() {
-        expect(webAPIAuth.isLoggedIn()).toBeFalsy();
-    });
-
     it('should return undefined token when not logged in', function() {
         expect(webAPIAuth.getToken()).toBeUndefined();
     });
 
+    it('should return the current login state', function() {
+        expect(webAPIAuth.isLoggedIn()).toBeFalsy();
+    });
+
     it('should remember token', function() {
         logIn();
-        expect(webAPIAuth.getToken()).toBe('secret');
+        expect(webAPIAuth.getToken()).toBe('token');
     });
 
     it('should not decorate requests not targeted at the API with token information', function() {
@@ -72,7 +77,7 @@ describe('Service: webAPIAuth', function () {
 
     it('should decorate all subsequent requests to the API with the token information', function() {
         logIn();
-        $httpBackend.expectGET( endpoint + 'test', {"Accept":"application/json, text/plain, */*","Authorization":"secret"} ).respond();
+        $httpBackend.expectGET( endpoint + 'test', {"Accept":"application/json, text/plain, */*","Authorization":"token"} ).respond();
         $http.get( endpoint + 'test' );
         $httpBackend.flush();
     });
@@ -86,7 +91,7 @@ describe('Service: webAPIAuth', function () {
         logIn();
         webAPIAuth.logout();
 
-        expect(webAPIAuth.getToken()).toBeUndefined();
+        expect(webAPIAuth.getToken()).toBe(null);
         expect(webAPIAuth.isLoggedIn()).toBeFalsy();
 
         $httpBackend.expectGET( endpoint + 'test', {"Accept":"application/json, text/plain, */*"} ).respond();
@@ -95,13 +100,13 @@ describe('Service: webAPIAuth', function () {
     });
 
     it('should save token to local storage', function() {
-        expect($localStorage.token).toBeUndefined();
+        expect(localStorage.setItem).not.toHaveBeenCalled();
         logIn();
-        expect($localStorage.token).toBe('secret');
+        expect(localStorage.setItem).toHaveBeenCalledWith('token', 'token');
     });
 
     it('should use the token from local storage if defined', function() {
-        $localStorage.token = 'awesome';
+        token = 'awesome';
         expect(webAPIAuth.getToken()).toBe('awesome');
     });
 

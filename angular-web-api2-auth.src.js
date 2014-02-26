@@ -1,10 +1,9 @@
-angular.module('kennethlynne.webapi2auth', ['ngStorage'])
+angular.module('kennethlynne.webAPI2Authentication', [])
     .provider('webAPIAuth', function ($httpProvider) {
 
         var tokenUrl = 'token';
-        var tokenNamespace = 'token';
 
-        $httpProvider.interceptors.push(function ($q, $injector) {
+        $httpProvider.interceptors.push(['$q', '$injector', function ($q, $injector) {
             return {
                 request: function (cfg) {
                     var token = $injector.get('webAPIAuth').getToken();
@@ -16,18 +15,21 @@ angular.module('kennethlynne.webapi2auth', ['ngStorage'])
                     return cfg || $q.when(cfg);
                 }
             };
-        });
+        }]);
 
         this.setTokenEndpointUrl = function (url) {
             tokenUrl = url;
         };
 
-        this.$get = function ($http, $localStorage, $log, $q) {
+        this.$get = ['$http', '$window', '$log', '$q', function ($http, $window, $log, $q) {
+
+            var localStorage = $window.localStorage;
+
             var _logout = function () {
-                    delete $localStorage[tokenNamespace];
+                    localStorage.setItem('token', null);
                 },
                 _getToken = function () {
-                    return $localStorage[tokenNamespace];
+                    return localStorage.getItem('token');
                 },
                 _login = function (grantType, username, password) {
 
@@ -43,7 +45,7 @@ angular.module('kennethlynne.webapi2auth', ['ngStorage'])
                     $http(cfg).then(function (response) {
                         if (response && response.data) {
                             var data = response.data;
-                            $localStorage[tokenNamespace] = data.access_token;
+                            localStorage.setItem('token', data.access_token);
                             deferred.resolve(true);
                         }
                         else
@@ -63,7 +65,7 @@ angular.module('kennethlynne.webapi2auth', ['ngStorage'])
 
                 },
                 _isLoggedIn = function () {
-                    return typeof $localStorage[tokenNamespace] == 'string';
+                    return typeof _getToken() == 'string';
                 };
 
             return {
@@ -72,5 +74,5 @@ angular.module('kennethlynne.webapi2auth', ['ngStorage'])
                 getToken: _getToken,
                 logout: _logout
             }
-        }
+        }];
     });
