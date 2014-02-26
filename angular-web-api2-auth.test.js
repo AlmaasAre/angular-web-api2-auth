@@ -15,6 +15,7 @@ describe('Service: webAPIAuth', function () {
 
         module('kennethlynne.webAPI2Authentication', function ($provide, webAPIAuthProvider) {
             webAPIAuthProvider.setTokenEndpointUrl(endpoint);
+            webAPIAuthProvider.setAPIUrl('API');
             $provide.value('$window', {localStorage:localStorage})
         });
 
@@ -77,8 +78,8 @@ describe('Service: webAPIAuth', function () {
 
     it('should decorate all subsequent requests to the API with the token information', function() {
         logIn();
-        $httpBackend.expectGET( endpoint + 'test', {"Accept":"application/json, text/plain, */*","Authorization":"token"} ).respond();
-        $http.get( endpoint + 'test' );
+        $httpBackend.expectGET( 'API/test', {"Accept":"application/json, text/plain, */*","Authorization":"token"} ).respond();
+        $http.get( 'API/test' );
         $httpBackend.flush();
     });
 

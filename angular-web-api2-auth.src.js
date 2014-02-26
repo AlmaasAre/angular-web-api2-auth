@@ -1,13 +1,15 @@
 angular.module('kennethlynne.webAPI2Authentication', [])
     .provider('webAPIAuth', function ($httpProvider) {
 
-        var tokenUrl = 'token';
+        var tokenUrl = '';
+
+        var endpointUrl = '';
 
         $httpProvider.interceptors.push(['$q', '$injector', function ($q, $injector) {
             return {
                 request: function (cfg) {
                     var token = $injector.get('webAPIAuth').getToken();
-                    var matchesAPIUrl = cfg.url.substr(0, tokenUrl.length) === tokenUrl;
+                    var matchesAPIUrl = cfg.url.substr(0, endpointUrl.length) === endpointUrl;
 
                     if (token && matchesAPIUrl) {
                         cfg.headers['Authorization'] = token;
@@ -19,6 +21,10 @@ angular.module('kennethlynne.webAPI2Authentication', [])
 
         this.setTokenEndpointUrl = function (url) {
             tokenUrl = url;
+        };
+
+        this.setAPIUrl = function (url) {
+            endpointUrl = url;
         };
 
         this.$get = ['$http', '$window', '$log', '$q', function ($http, $window, $log, $q) {
