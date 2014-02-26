@@ -1,5 +1,5 @@
 {
-  "version": "0.0.4",
+  "version": "0.0.5",
   "name": "angular-web-api2-auth",
   "description": "Angular provider for integration with WebAPI2 token authentication",
   "author": "Kenneth Lynne <kenneth.lynne@gmail.com>",
