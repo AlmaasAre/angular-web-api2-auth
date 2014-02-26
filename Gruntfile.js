@@ -15,7 +15,6 @@ module.exports = function (grunt) {
                 options: {
                     files: [
                         'bower_components/angular/angular.js',
-                        'bower_components/ngstorage/ngstorage.js',
                         'bower_components/angular-mocks/angular-mocks.js',
                         'angular-web-api2-auth.min.js',
                         'angular-web-api2-auth.test.js'
