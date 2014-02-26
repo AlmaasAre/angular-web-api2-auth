@@ -19,6 +19,7 @@ angular.module('yourApp').config(function () {
 
 angular.module('yourApp').controller(function (webAPIAuth) {
 
+    // bearer, username, password
     webAPIAuth.login('password', 'John_doe', 'password123')
 
        .then(function () {
