@@ -10,7 +10,7 @@ Angular provider for integration with WebAPI2 token authentication
 //Register dependancy
 angular.module('yourApp', ['kennethlynne.webAPI2Authentication'])
 
-angular.module('yourApp').config(function () {
+angular.module('yourApp').config(function (webAPIAuthProvider) {
 
     webAPIAuthProvider.setAPIUrl('https://your-api.com'); //Only requests to this endpoint will get the Authorization headers modified
     webAPIAuthProvider.setTokenEndpointUrl('your-api.com/token');
