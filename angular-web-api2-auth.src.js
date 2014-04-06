@@ -12,7 +12,7 @@ angular.module('kennethlynne.webAPI2Authentication', [])
                     var matchesAPIUrl = cfg.url.substr(0, endpointUrl.length) === endpointUrl;
 
                     if (token && matchesAPIUrl) {
-                        cfg.headers['Authorization'] = token;
+                        cfg.headers['Authorization'] = 'Bearer ' + token;
                     }
                     return cfg || $q.when(cfg);
                 }
