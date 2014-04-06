@@ -32,7 +32,7 @@ angular.module('kennethlynne.webAPI2Authentication', [])
             var localStorage = $window.localStorage;
 
             var _logout = function () {
-                    localStorage.setItem('token', null);
+                    localStorage.removeItem('token');
                 },
                 _getToken = function () {
                     return localStorage.getItem('token');
