@@ -9,13 +9,13 @@ describe('Service: webAPIAuth', function () {
     token = undefined;
 
     localStorage = {
-      setItem: jasmine.createSpy('localStorage.setItem').andCallFake(function (k, v) {
+      setItem: jasmine.createSpy('localStorage.setItem').and.callFake(function (k, v) {
         token = v
       }),
-      getItem: jasmine.createSpy('localStorage.getItem').andCallFake(function () {
+      getItem: jasmine.createSpy('localStorage.getItem').and.callFake(function () {
         return token
       }),
-      removeItem: jasmine.createSpy('localStorage.removeItem').andCallFake(function () {
+      removeItem: jasmine.createSpy('localStorage.removeItem').and.callFake(function () {
         token = undefined
       })
     };
@@ -23,6 +23,7 @@ describe('Service: webAPIAuth', function () {
     module('kennethlynne.webAPI2Authentication', function ($provide, webAPIAuthProvider) {
       webAPIAuthProvider.setTokenEndpointUrl(endpoint);
       webAPIAuthProvider.setAPIUrl('API');
+      webAPIAuthProvider.setLocalstorageKey('xtoken');
       $provide.value('$window', {localStorage: localStorage})
     });
 
@@ -107,10 +108,15 @@ describe('Service: webAPIAuth', function () {
     $httpBackend.flush();
   });
 
-  it('should save token to local storage', function () {
+  it('should save token to local storage through setToken', function () {
     expect(localStorage.setItem).not.toHaveBeenCalled();
     logIn();
-    expect(localStorage.setItem).toHaveBeenCalledWith('token', 'token');
+    expect(localStorage.setItem).toHaveBeenCalledWith('xtoken', 'token');
+  });
+
+  it('should save token to local storage', function () {
+    webAPIAuth.setToken('awesome');
+    expect(localStorage.setItem).toHaveBeenCalledWith('xtoken', 'awesome');
   });
 
   it('should use the token from local storage if defined', function () {

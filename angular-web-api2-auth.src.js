@@ -2,7 +2,8 @@ angular.module('kennethlynne.webAPI2Authentication', [])
   .provider('webAPIAuth', function ($httpProvider) {
 
     var tokenUrl = '',
-      endpointUrl = '';
+      endpointUrl = '',
+      localStorageKey = 'token';
 
     $httpProvider.interceptors.push(['$q', '$injector', function ($q, $injector) {
       return {
@@ -18,6 +19,10 @@ angular.module('kennethlynne.webAPI2Authentication', [])
       };
     }]);
 
+    this.setLocalstorageKey = function (key) {
+      localStorageKey = key;
+    };
+
     this.setTokenEndpointUrl = function (url) {
       tokenUrl = url;
     };
@@ -30,10 +35,13 @@ angular.module('kennethlynne.webAPI2Authentication', [])
 
       var localStorage = $window.localStorage,
         _logout = function () {
-          localStorage.removeItem('token');
+          localStorage.removeItem(localStorageKey);
         },
         _getToken = function () {
-          return localStorage.getItem('token');
+          return localStorage.getItem(localStorageKey);
+        },
+        _setToken = function (token) {
+          return localStorage.setItem(localStorageKey, token);
         },
         _login = function (grantType, username, password) {
           var deferred = $q.defer(),
@@ -47,7 +55,7 @@ angular.module('kennethlynne.webAPI2Authentication', [])
           $http(cfg).then(function (response) {
             if (response && response.data) {
               var data = response.data;
-              localStorage.setItem('token', data.access_token);
+              _setToken(data.access_token);
               deferred.resolve(true);
             }
             else {
@@ -73,6 +81,7 @@ angular.module('kennethlynne.webAPI2Authentication', [])
         isLoggedIn: _isLoggedIn,
         login: _login,
         getToken: _getToken,
+        setToken: _setToken,
         logout: _logout
       }
     }];
