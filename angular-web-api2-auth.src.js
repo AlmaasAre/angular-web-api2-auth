@@ -31,7 +31,7 @@ angular.module('kennethlynne.webAPI2Authentication', [])
       endpointUrl = url;
     };
 
-    this.$get = ['$http', '$window', '$log', '$q', function ($http, $window, $log, $q) {
+    this.$get = ['$http', '$window', '$q', function ($http, $window, $q) {
 
       var localStorage = $window.localStorage,
         _logout = function () {
