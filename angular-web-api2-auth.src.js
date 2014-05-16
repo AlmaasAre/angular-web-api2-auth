@@ -52,22 +52,19 @@ angular.module('kennethlynne.webAPI2Authentication', [])
               headers: {'Content-Type': 'application/x-www-form-urlencoded'}
             };
 
-          $http(cfg).then(function (response) {
-            if (response && response.data) {
-              var data = response.data;
-              _setToken(data.access_token);
-              deferred.resolve(true);
-            }
-            else {
-              deferred.reject('No data received');
-            }
-          })
+          $http(cfg)
+            .then(function (response) {
+              if (response && response.data) {
+                _setToken(response.data.access_token);
+                deferred.resolve(true);
+              }
+              else {
+                deferred.reject('No data received');
+              }
+            })
             .catch(function (response) {
               var message = (response && response.data && response.data.message) ? response.data.message : '';
               deferred.reject('Could not log you in. ' + message);
-            })
-            .finally(function () {
-              $log.log('Log in request finished.');
             });
 
           return deferred.promise;
