@@ -2,7 +2,7 @@
 
 describe('Service: webAPIAuth', function () {
 
-  var webAPIAuth, $httpBackend, endpoint = 'url/token', $http, loginSuccessfulResponse, loginFailedResponse, logIn, localStorage, token;
+  var webAPIAuth, $httpBackend, endpoint = 'url/token', logoutUrl = 'url/logout', $http, loginSuccessfulResponse, loginFailedResponse, logIn, localStorage, token;
 
   beforeEach(function () {
 
@@ -22,6 +22,7 @@ describe('Service: webAPIAuth', function () {
 
     module('kennethlynne.webAPI2Authentication', function ($provide, webAPIAuthProvider) {
       webAPIAuthProvider.setTokenEndpointUrl(endpoint);
+      webAPIAuthProvider.setLogoutEndpointUrl(logoutUrl);
       webAPIAuthProvider.setAPIUrl('API');
       webAPIAuthProvider.setLocalstorageKey('xtoken');
       $provide.value('$window', {localStorage: localStorage})
@@ -98,6 +99,12 @@ describe('Service: webAPIAuth', function () {
 
   it('should reset information on logout', function () {
     logIn();
+
+    $httpBackend.expectPOST(logoutUrl, null,
+      {
+        "Accept": "application/json, text/plain, */*",
+        "Authorization": "Bearer token"
+      }).respond(200, {});
     webAPIAuth.logout();
 
     expect(webAPIAuth.getToken()).toBeUndefined();
@@ -140,6 +147,17 @@ describe('Service: webAPIAuth', function () {
 
     expect(failed).toHaveBeenCalled();
     expect(success).not.toHaveBeenCalled();
+  });
+
+  it('should do a call to logout on logount', function () {
+    logIn();
+    $httpBackend.expectPOST(logoutUrl, null,
+      {
+        "Accept": "application/json, text/plain, */*",
+        "Authorization": "Bearer token"
+      }).respond(200, {});
+    webAPIAuth.logout();
+    $httpBackend.flush();
   });
 
 });

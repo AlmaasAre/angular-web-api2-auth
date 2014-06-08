@@ -3,6 +3,7 @@ angular.module('kennethlynne.webAPI2Authentication', [])
 
     var tokenUrl = '',
       endpointUrl = '',
+      logoutUrl = '',
       localStorageKey = 'token';
 
     $httpProvider.interceptors.push(['$q', '$injector', function ($q, $injector) {
@@ -27,6 +28,10 @@ angular.module('kennethlynne.webAPI2Authentication', [])
       tokenUrl = url;
     };
 
+    this.setLogoutEndpointUrl = function (url) {
+      logoutUrl = url;
+    };
+
     this.setAPIUrl = function (url) {
       endpointUrl = url;
     };
@@ -35,7 +40,33 @@ angular.module('kennethlynne.webAPI2Authentication', [])
 
       var localStorage = $window.localStorage,
         _logout = function () {
+          var deferred = $q.defer(),
+            cfg = {
+              method: 'POST',
+              url: logoutUrl,
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': 'Bearer ' + _getToken()
+              }
+            };
+
+          $http(cfg)
+            .then(function (response) {
+              if (response && response.data) {
+                deferred.resolve(true);
+              }
+              else {
+                deferred.reject('No data received');
+              }
+            })
+            .catch(function (response) {
+              var message = (response && response.data && response.data.message) ? response.data.message : '';
+              deferred.reject('Could not log you out. ' + message);
+            });
+
           localStorage.removeItem(localStorageKey);
+
+          return deferred.promise;
         },
         _getToken = function () {
           return localStorage.getItem(localStorageKey);
