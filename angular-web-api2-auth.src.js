@@ -4,7 +4,9 @@ angular.module('kennethlynne.webAPI2Authentication', [])
     var tokenUrl = '',
       endpointUrl = '',
       logoutUrl = '',
-      localStorageKey = 'token';
+      localStorageKey = 'token',
+      externalUserInfoUrl = '',
+      registerExternalUserUrl = '';
 
     $httpProvider.interceptors.push(['$q', '$injector', function ($q, $injector) {
       return {
@@ -30,6 +32,14 @@ angular.module('kennethlynne.webAPI2Authentication', [])
 
     this.setLogoutEndpointUrl = function (url) {
       logoutUrl = url;
+    };
+
+    this.setExternalUserInfoEndpointUrl = function (url) {
+      externalUserInfoUrl = url;
+    };
+
+    this.setRegisterExternalUserEndpointUrl = function (url) {
+      registerExternalUserUrl = url;
     };
 
     this.setAPIUrl = function (url) {
@@ -103,11 +113,65 @@ angular.module('kennethlynne.webAPI2Authentication', [])
         },
         _isLoggedIn = function () {
           return typeof _getToken() == 'string';
+        },
+        _getExternalUserInfo = function (token) {
+          var deferred = $q.defer(),
+            cfg = {
+              method: 'GET',
+              url: externalUserInfoUrl,
+              headers: {
+                'Authorization': 'Bearer ' + token
+              }
+            };
+
+          $http(cfg)
+            .then(function (response) {
+              if (response && response.data) {
+                deferred.resolve(response.data);
+              }
+              else {
+                deferred.reject('No data received');
+              }
+            })
+            .catch(function (response) {
+              var message = (response && response.data && response.data.message) ? response.data.message : '';
+              deferred.reject('Could not get external user info. ' + message);
+            });
+
+          return deferred.promise;
+
+        },
+        _registerExternalUser = function (token, username) {
+          var deferred = $q.defer();
+          cfg = {
+            method: 'POST',
+            url: registerExternalUserUrl,
+            data: 'userName=' + username,
+            headers: {
+              'Authorization': 'Bearer ' + token,
+              'Content-Type': 'application/x-www-form-urlencoded'
+            }
+          };
+
+          $http(cfg).then(function (response) {
+            deferred.resolve(response.data);
+          })
+            .catch(function (response) {
+              var message = (response && response.data && response.data.message) ? response.data.message : '';
+              deferred.reject('Could not register external user. ' + message);
+            })
+            .finally(function () {
+              $log.log('Register external user request finished.');
+            });
+          return deferred.promise();
         };
+
 
       return {
         isLoggedIn: _isLoggedIn,
         login: _login,
+        getExternalUserInfo: _getExternalUserInfo,
+        registerExternalUser: _registerExternalUser,
         getToken: _getToken,
         setToken: _setToken,
         logout: _logout

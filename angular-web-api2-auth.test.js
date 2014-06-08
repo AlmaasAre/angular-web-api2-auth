@@ -2,7 +2,9 @@
 
 describe('Service: webAPIAuth', function () {
 
-  var webAPIAuth, $httpBackend, endpoint = 'url/token', logoutUrl = 'url/logout', $http, loginSuccessfulResponse, loginFailedResponse, logIn, localStorage, token;
+  var webAPIAuth, $httpBackend, endpoint = 'url/token', logoutUrl = 'url/logout',
+    externalUserInfoUrl = 'url/externalUser', registerExternalUserUrl = 'url/registerExternalUser',
+    $http, loginSuccessfulResponse, loginFailedResponse, logIn, localStorage, token;
 
   beforeEach(function () {
 
@@ -25,6 +27,8 @@ describe('Service: webAPIAuth', function () {
       webAPIAuthProvider.setLogoutEndpointUrl(logoutUrl);
       webAPIAuthProvider.setAPIUrl('API');
       webAPIAuthProvider.setLocalstorageKey('xtoken');
+      webAPIAuthProvider.setExternalUserInfoEndpointUrl(externalUserInfoUrl);
+      webAPIAuthProvider.setRegisterExternalUserEndpointUrl(registerExternalUserUrl);
       $provide.value('$window', {localStorage: localStorage})
     });
 
@@ -158,6 +162,14 @@ describe('Service: webAPIAuth', function () {
       }).respond(200, {});
     webAPIAuth.logout();
     $httpBackend.flush();
+  });
+  
+  it('should get user info', function() {
+      
+  });
+
+  it('should register user info', function() {
+
   });
 
 });
