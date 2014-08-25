@@ -6,7 +6,8 @@ angular.module('kennethlynne.webAPI2Authentication', [])
       logoutUrl = '',
       localStorageKey = 'token',
       externalUserInfoUrl = '',
-      registerExternalUserUrl = '';
+      registerExternalUserUrl = '',
+      deleteAccountUrl = '';
 
     $httpProvider.interceptors.push(['$q', '$injector', function ($q, $injector) {
       return {
@@ -40,6 +41,10 @@ angular.module('kennethlynne.webAPI2Authentication', [])
 
     this.setRegisterExternalUserEndpointUrl = function (url) {
       registerExternalUserUrl = url;
+    };
+
+    this.setDeleteAccountEndpointUrl = function (url) {
+      deleteAccountUrl = url;
     };
 
     this.setAPIUrl = function (url) {
@@ -164,8 +169,30 @@ angular.module('kennethlynne.webAPI2Authentication', [])
               $log.log('Register external user request finished.');
             });
           return deferred.promise();
-        };
+        },
+        _deleteAccount = function (token) {
+          var deferred = $q.defer();
+          var cfg = {
+            method: 'POST',
+            url: deleteAccountUrl,
+            headers: {
+              'Authorization': 'Bearer ' + token,
+              'Content-Type': 'application/x-www-form-urlencoded'
+            }
+          };
 
+          $http(cfg).then(function (response) {
+            deferred.resolve(response.data);
+          })
+            .catch(function (response) {
+              var message = (response && response.data && response.data.message) ? response.data.message : '';
+              deferred.reject('Could not delete account. ' + message);
+            })
+            .finally(function () {
+              $log.log('Delete account request finished.');
+            });
+          return deferred.promise();
+        };
 
       return {
         isLoggedIn: _isLoggedIn,
@@ -174,7 +201,8 @@ angular.module('kennethlynne.webAPI2Authentication', [])
         registerExternalUser: _registerExternalUser,
         getToken: _getToken,
         setToken: _setToken,
-        logout: _logout
+        logout: _logout,
+        deleteAccount: _deleteAccount
       }
     }];
   });
