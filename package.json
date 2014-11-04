@@ -1,5 +1,5 @@
 {
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Angular provider for integration with WebAPI2 token authentication",
   "dependencies": {},
   "devDependencies": {
