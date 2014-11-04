@@ -191,7 +191,7 @@ angular.module('kennethlynne.webAPI2Authentication', [])
             .finally(function () {
               $log.log('Delete account request finished.');
             });
-          return deferred.promise();
+          return deferred.promise;
         };
 
       return {
