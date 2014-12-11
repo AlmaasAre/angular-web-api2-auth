@@ -168,7 +168,7 @@ angular.module('kennethlynne.webAPI2Authentication', [])
             .finally(function () {
               $log.log('Register external user request finished.');
             });
-          return deferred.promise();
+          return deferred.promise;
         },
         _deleteAccount = function (token) {
           var deferred = $q.defer();
